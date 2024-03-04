@@ -22,6 +22,8 @@ app.use(cors())
 app.use(xss())
 
 // * ROUTES * //
+// Auth Router
+app.use('/api/v1/auth', require('./routes/auth.routes'))
 
 // 404 Handler
 app.use(notFoundHandler)

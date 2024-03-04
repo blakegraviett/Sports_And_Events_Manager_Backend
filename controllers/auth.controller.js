@@ -6,8 +6,10 @@ const {
   unsuccessfulRes,
   unauthorizedRes,
 } = require('../lib/response')
+const { sendVerificationEmail } = require('../lib/email')
 
 // * CONTROLLERS * //
+
 // Register User
 const registerUser = async (req, res) => {
   // get data from request body
@@ -34,11 +36,50 @@ const registerUser = async (req, res) => {
     verificationToken,
   })
 
+  // ! ONLY FOR TESTING PURPOSES! CHANGE TO PRODUCTION LATER!
+  const origin = 'http://localhost:4200'
+
+  // send verification email
+  await sendVerificationEmail({
+    name: newUser.name,
+    email: newUser.email,
+    verificationToken: newUser.verificationToken,
+    origin: origin,
+  })
+
   successfulRes({ res, data: newUser })
 }
 
 // Verify User Email
-const verifyEmail = async (req, res) => {}
+const verifyEmail = async (req, res) => {
+  // get data from request body
+  const { token, email } = req.query
+
+  // if no token or email, return error
+  if (!token || !email) {
+    return unsuccessfulRes({ res })
+  }
+
+  // find user by email
+  const user = await User.findOne({ email })
+
+  // if user not found, return error
+  if (!user) {
+    return unsuccessfulRes({ res, status: 400, msg: 'User not found' })
+  }
+
+  // check if token is valid
+  if (user.verificationToken !== token) {
+    return unsuccessfulRes({ res, status: 400, msg: 'Invalid token' })
+  }
+
+  // update user
+  user.isVerified = true
+  user.verificationToken = null
+  user.save()
+
+  return successfulRes({ res, data: user })
+}
 
 // Login User
 const loginUser = async (req, res) => {}

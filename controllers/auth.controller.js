@@ -118,7 +118,7 @@ const loginUser = async (req, res) => {
     })
   }
 
-  // create token
+  // construct token
   const tokenUser = { name: user.name, userId: user._id, role: user.role }
 
   // create refresh token
@@ -129,23 +129,64 @@ const loginUser = async (req, res) => {
 
   if (exsisitingToken) {
     const { isValid } = exsisitingToken
-    if (isValid) {
+    if (!isValid) {
       return unauthorizedRes({ res })
     }
     // If token exsist replace it
     refreshToken = exsisitingToken.refreshToken
+
+    // attach cookies to response
+    attachCookiesToResponse({ res, user: tokenUser, refreshToken })
+
+    // return successful res
+    successfulRes({ res, data: user })
+    return
   }
 
-  // attach cookies to response
+  // Construct token
+  refreshToken = crypto.randomBytes(40).toString('hex')
+  const userAgent = req.headers['user-agent']
+  const ip = req.ip
+
+  const userToken = {
+    refreshToken,
+    userAgent,
+    ip,
+    user: user._id,
+  }
+
+  await Token.create(userToken)
+
   attachCookiesToResponse({ res, user: tokenUser, refreshToken })
 
-  // return successful res
+  successfulRes({ res, data: { user: tokenUser } })
+}
+
+// Current User Check
+const me = async (req, res) => {
+  const { user } = req
+
   successfulRes({ res, data: user })
-  return
 }
 
 // Logout User
-const logoutUser = async (req, res) => {}
+const logoutUser = async (req, res) => {
+  // get the user and delete the token
+  await Token.findOneAndDelete({ user: req.user.userId })
+
+  // clear cookies
+  res.cookie('accessToken', 'logout', {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  })
+
+  res.cookie('refreshToken', 'logout', {
+    expires: new Date(Date.now()),
+    httpOnly: true,
+  })
+
+  return successfulRes({ res })
+}
 
 // * EXPORTS * //
 module.exports = {

@@ -1,6 +1,8 @@
 // * IMPORTS * //
 const User = require('../models/user.model')
+const Token = require('../models/token.model')
 const crypto = require('crypto')
+const { attachCookiesToResponse } = require('../lib/cookie')
 const {
   successfulRes,
   unsuccessfulRes,
@@ -82,7 +84,65 @@ const verifyEmail = async (req, res) => {
 }
 
 // Login User
-const loginUser = async (req, res) => {}
+const loginUser = async (req, res) => {
+  // get data from request body
+  const { email, password } = req.body
+
+  // if no email or password, return error
+  if (!email || !password) {
+    return unsuccessfulRes({ res })
+  }
+
+  // find user by email
+  const user = await User.findOne({ email })
+
+  // if user not found, return error
+  if (!user) {
+    return unauthorizedRes({ res })
+  }
+
+  // check if password is correct
+  const isMatch = user.comparePassword(password)
+
+  // if password is not correct, return error
+  if (!isMatch) {
+    return unauthorizedRes({ res })
+  }
+
+  // check if user is verified
+  if (!user.isVerified) {
+    return unsuccessfulRes({
+      res,
+      status: 400,
+      msg: 'Please verify your email',
+    })
+  }
+
+  // create token
+  const tokenUser = { name: user.name, userId: user._id, role: user.role }
+
+  // create refresh token
+  let refreshToken = ''
+
+  // check for exsisiting token
+  const exsisitingToken = await Token.findOne({ user: user._id })
+
+  if (exsisitingToken) {
+    const { isValid } = exsisitingToken
+    if (isValid) {
+      return unauthorizedRes({ res })
+    }
+    // If token exsist replace it
+    refreshToken = exsisitingToken.refreshToken
+  }
+
+  // attach cookies to response
+  attachCookiesToResponse({ res, user: tokenUser, refreshToken })
+
+  // return successful res
+  successfulRes({ res, data: user })
+  return
+}
 
 // Logout User
 const logoutUser = async (req, res) => {}

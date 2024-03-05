@@ -1,5 +1,5 @@
 // * IMPORTS * //
-const { mongoose } = require('mongoose')
+const { mongoose, Types } = require('mongoose')
 const Schema = mongoose.Schema
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -31,7 +31,11 @@ const userModel = new Schema({
     enum: ['user', 'admin', 'worker'],
     default: 'user',
   },
-  // TODO: LINK TO A ORGANIZATION
+  org: {
+    type: Types.ObjectId,
+    ref: 'Org',
+    required: true,
+  },
   isVerified: {
     type: Boolean,
     default: false,

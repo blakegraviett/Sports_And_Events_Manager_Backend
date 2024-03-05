@@ -1,6 +1,8 @@
 // * IMPORTS * //
 const User = require('../models/user.model')
 const Token = require('../models/token.model')
+const jwt = require('jsonwebtoken')
+const Org = require('../models/org.model')
 const crypto = require('crypto')
 const { attachCookiesToResponse } = require('../lib/cookie')
 const {
@@ -15,7 +17,7 @@ const { sendVerificationEmail } = require('../lib/email')
 // Register User
 const registerUser = async (req, res) => {
   // get data from request body
-  const { name, email, password } = req.body
+  const { name, email, password, org } = req.body
 
   // if no email or password, return error
   if (!email || !password) {
@@ -27,6 +29,17 @@ const registerUser = async (req, res) => {
     return unsuccessfulRes({ res, status: 400, msg: 'User already exists' })
   }
 
+  // Find organization by name
+  const foundOrg = await Org.findOne({ name: org })
+
+  // check if there is an organization
+  if (!foundOrg) {
+    return unsuccessfulRes({
+      res,
+      status: 400,
+      msg: 'Not a valid organization',
+    })
+  }
   // create verification token
   const verificationToken = crypto.randomBytes(40).toString('hex')
 
@@ -35,6 +48,7 @@ const registerUser = async (req, res) => {
     name,
     email,
     password,
+    org: foundOrg._id,
     verificationToken,
   })
 
@@ -119,7 +133,12 @@ const loginUser = async (req, res) => {
   }
 
   // construct token
-  const tokenUser = { name: user.name, userId: user._id, role: user.role }
+  const tokenUser = {
+    name: user.name,
+    userId: user._id,
+    role: user.role,
+    org: user.org,
+  }
 
   // create refresh token
   let refreshToken = ''

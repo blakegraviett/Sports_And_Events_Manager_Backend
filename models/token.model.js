@@ -3,7 +3,7 @@ const { mongoose, Types } = require('mongoose')
 const Schema = mongoose.Schema
 
 // * MODEL * //
-const tokenModel = new mongoose.Schema(
+const tokenModel = new Schema(
   {
     refreshToken: {
       type: String,

@@ -181,6 +181,13 @@ const loginUser = async (req, res) => {
   successfulRes({ res, data: { user: tokenUser } })
 }
 
+// Current User Check
+const me = async (req, res) => {
+  const { user } = req
+
+  successfulRes({ res, data: user })
+}
+
 // Logout User
 const logoutUser = async (req, res) => {
   // get the user and delete the token

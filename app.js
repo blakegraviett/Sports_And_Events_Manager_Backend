@@ -25,6 +25,18 @@ app.use(xss())
 // Auth Router
 app.use('/api/v1/auth', require('./routes/auth.routes'))
 
+// Events Router
+app.use('/api/v1/events', require('./routes/event.routes'))
+
+// Users Router
+app.use('/api/v1/users', require('./routes/user.routes'))
+
+// Organizations Router
+app.use('/api/v1/orgs', require('./routes/org.routes'))
+
+// Teams Router
+app.use('/api/v1/teams', require('./routes/team.routes'))
+
 // 404 Handler
 app.use(notFoundHandler)
 

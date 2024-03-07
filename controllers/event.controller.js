@@ -48,7 +48,7 @@ const getSingleEvent = async (req, res) => {
 // Creat event for an organization by admin
 const createEvent = async (req, res) => {
   // Get the information from the request body
-  const { name, location, date, description, teamNames, workerEmails } =
+  const { name, location, date, description, teamNames, workerEmails, sport } =
     req.body
 
   // Get the workers from there email address
@@ -65,6 +65,7 @@ const createEvent = async (req, res) => {
     name,
     location,
     date,
+    sport,
     description,
     teams,
     workers,
@@ -119,6 +120,66 @@ const updateEvent = async (req, res) => {
 
   // send back the updated event
   return successfulRes({ res, data: updatedEvent })
+}
+
+// Update score of a sport by admin
+const updateScore = async (req, res) => {
+  // Get the id from the parameter
+  const { id } = req.params
+
+  // if no id, return error
+  if (!id) {
+    return unsuccessfulRes({ res })
+  }
+
+  // Get the information from the request body
+  const { score } = req.body
+
+  // if no score, return error
+  if (!score) {
+    return unsuccessfulRes({ res })
+  }
+
+  // Get the event
+  const foundEvent = await Event.findOne({ _id: id })
+
+  // if no event, return error
+  if (!foundEvent) {
+    return unsuccessfulRes({ res, status: 404, msg: 'Event not found' })
+  }
+
+  // get the sport from the event
+  const sport = foundEvent.sport
+
+  // type of period default
+  let period = ''
+
+  if (sport === 'baseball') {
+    period = 'innging'
+  }
+  if (sport === 'football' || sport === 'basketball') {
+    period = 'quarter'
+  }
+  if (sport === 'volleyball') {
+    period = 'game'
+  }
+
+  // defauly peiord ammount
+  let periodAmount = 0
+
+  // if there already are periods set the amount equal to that
+  if (foundEvent.period.length) {
+    periodAmount = foundEvent.period.length
+  }
+
+  // add the new period to the event
+  foundEvent.period.push(`${periodAmount + 1} ${period} : ${score}`)
+
+  // save the update to the database
+  await foundEvent.save()
+
+  // return the updated score
+  return successfulRes({ res, data: foundEvent })
 }
 
 // Delete event for an organization by admin
@@ -206,4 +267,5 @@ module.exports = {
   updateEvent,
   deleteEvent,
   sendEmailToWorkers,
+  updateScore,
 }

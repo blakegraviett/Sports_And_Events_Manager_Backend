@@ -3,6 +3,7 @@ const Event = require('../models/event.model')
 const User = require('../models/user.model')
 const Team = require('../models/team.model')
 const { successfulRes, unsuccessfulRes } = require('../lib/response')
+const { sendEmail } = require('../lib/email')
 
 // * CONTROLLERS * //
 // Get all events based on organization
@@ -137,6 +138,66 @@ const deleteEvent = async (req, res) => {
   return successfulRes({ res, data: { message: 'Event deleted successfully' } })
 }
 
+// send emails to the workers of an event
+const sendEmailToWorkers = async (req, res) => {
+  // Get the id from the parameter
+  const { id } = req.params
+
+  // if no id, return error
+  if (!id) {
+    return unsuccessfulRes({ res })
+  }
+
+  // Get info from the request body
+  const { subject, body, isIndividual } = req.body
+
+  // if no to or subject or body, return error
+  if (!subject || !body) {
+    return unsuccessfulRes({ res })
+  }
+
+  // Get the event
+  const event = await Event.findOne({ _id: id })
+
+  // if no event, return error
+  if (!event) {
+    return unsuccessfulRes({ res, status: 404, msg: 'Event not found' })
+  }
+
+  // find all the workers of the event
+  // ? $in is used to get all the ids of the users in the events, workers array
+  const workers = await User.find({ _id: { $in: event.workers } })
+
+  // get all the workers emails
+  const workersEmails = workers.map((worker) => worker.email)
+
+  // get the email of the admin user
+  const { email } = req.user
+
+  // send emails to each workers
+  if (isIndividual == 'false') {
+    // ! ADD THEM IN THE SAME THREAD
+    await sendEmail({
+      from: email,
+      to: workersEmails,
+      subject: subject,
+      html: body,
+    })
+  }
+
+  if (isIndividual == 'true') {
+    // ! SEND INDIVIDUAL EMAILS TO ALL THE WORKERS * //
+    for (let i = 0; i < workersEmails.length; i++) {
+      console.log('workersEmails[i]:', workersEmails[i])
+
+      await sendEmail({ to: workersEmails[i], subject: subject, html: body })
+    }
+  }
+
+  // return all the workers
+  return successfulRes({ res, data: workersEmails })
+}
+
 // * EXPORTS * //
 module.exports = {
   getAllEvents,
@@ -144,4 +205,5 @@ module.exports = {
   createEvent,
   updateEvent,
   deleteEvent,
+  sendEmailToWorkers,
 }

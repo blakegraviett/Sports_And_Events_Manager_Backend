@@ -9,33 +9,33 @@ const getAllUsersByOrg = async (req, res) => {
   const { org } = req.user
 
   // get all teams based on organization
-  const user = await User.find({ org: org })
+  const foundUser = await User.find({ org: org })
 
   // if no users, return error
-  if (!user) {
+  if (!foundUser) {
     return unsuccessfulRes({ res, msg: 'No users found' })
   }
 
   // default to empty array
-  let userInfo = []
+  let user = []
 
   // Looping through the array to get only needed properties
-  for (let i = 0; i < user.length; i++) {
+  for (let i = 0; i < foundUser.length; i++) {
     // Accessing the properties of each object
-    let currentObject = user[i]
+    let currentObject = foundUser[i]
     let name = currentObject.name
     let email = currentObject.email
     let id = currentObject._id
 
     // Printing or using the properties
-    userInfo.push({ name, email, id })
+    user.push({ name, email, id })
   }
 
   // return all users
   return successfulRes({
     res,
     data: {
-      users: userInfo,
+      users: user,
     },
   })
 }
@@ -62,9 +62,9 @@ const getSingleUser = async (req, res) => {
   return successfulRes({
     res,
     data: {
-      userName: user.name,
-      userEmail: user.email,
-      userId: user._id,
+      name: user.name,
+      email: user.email,
+      id: user._id,
     },
   })
 }

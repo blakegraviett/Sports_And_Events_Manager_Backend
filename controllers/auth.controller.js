@@ -135,6 +135,7 @@ const loginUser = async (req, res) => {
   // construct token
   const tokenUser = {
     name: user.name,
+    email: user.email,
     userId: user._id,
     role: user.role,
     org: user.org,

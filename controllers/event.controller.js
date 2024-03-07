@@ -149,7 +149,7 @@ const sendEmailToWorkers = async (req, res) => {
   }
 
   // Get info from the request body
-  const { subject, body } = req.body
+  const { subject, body, isIndividual } = req.body
 
   // if no to or subject or body, return error
   if (!subject || !body) {
@@ -175,20 +175,24 @@ const sendEmailToWorkers = async (req, res) => {
   const { email } = req.user
 
   // send emails to each workers
-  // ! ADD THEM IN THE SAME THREAD
-  await sendEmail({
-    from: email,
-    to: workersEmails,
-    subject: subject,
-    html: body,
-  })
+  if (isIndividual == 'false') {
+    // ! ADD THEM IN THE SAME THREAD
+    await sendEmail({
+      from: email,
+      to: workersEmails,
+      subject: subject,
+      html: body,
+    })
+  }
 
-  // ! SEND INDIVIDUAL EMAILS TO ALL THE WORKERS * //
-  // for (let i = 0; i < workersEmails.length; i++) {
-  //   console.log('workersEmails[i]:', workersEmails[i])
+  if (isIndividual == 'true') {
+    // ! SEND INDIVIDUAL EMAILS TO ALL THE WORKERS * //
+    for (let i = 0; i < workersEmails.length; i++) {
+      console.log('workersEmails[i]:', workersEmails[i])
 
-  //   await sendEmail({ to: workersEmails[i], subject: subject, html: body })
-  // }
+      await sendEmail({ to: workersEmails[i], subject: subject, html: body })
+    }
+  }
 
   // return all the workers
   return successfulRes({ res, data: workersEmails })

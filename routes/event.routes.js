@@ -11,6 +11,7 @@ const {
   updateEvent,
   deleteEvent,
   updateScore,
+  purchaseTickets,
   sendEmailToWorkers,
 } = require('../controllers/event.controller')
 
@@ -32,6 +33,9 @@ router.delete('/:id', authenticateAdmin, deleteEvent)
 
 // Send emails to the workers of an event
 router.post('/email-workers/:id', authenticateAdmin, sendEmailToWorkers)
+
+// send ticket purchase emails
+router.post('/ticket-purchase', authenticateAdmin, purchaseTickets)
 
 // Update score of a sport by admin
 router.patch('/score/:id', authenticateAdmin, updateScore)

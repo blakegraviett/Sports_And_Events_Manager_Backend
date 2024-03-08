@@ -70,8 +70,9 @@ const createEvent = async (req, res) => {
   // Get the organization and the author from the user
   const { org, userId } = req.user
 
-  let paymentLink = 'NA'
-  let paymentLinkID = 'NA'
+  // defaults
+  let paymentLink = ''
+  let paymentLinkID = ''
 
   if (itemPrice) {
     const product = await stripe.products.create({
@@ -246,10 +247,12 @@ const deleteEvent = async (req, res) => {
     return unsuccessfulRes({ res, status: 404, msg: 'Event not found' })
   }
 
-  // deactivate the events payment link
-  await stripe.paymentLinks.update(foundEvent.paymentLinkID, {
-    active: false,
-  })
+  // deactivate the events payment link if there is one
+  if (foundEvent.paymentLinkID) {
+    await stripe.paymentLinks.update(foundEvent.paymentLinkID, {
+      active: false,
+    })
+  }
 
   // Delete the event
   const deletedEvent = await Event.findOneAndDelete({ _id: id })

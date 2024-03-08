@@ -10,6 +10,7 @@ const {
   createEvent,
   updateEvent,
   deleteEvent,
+  updateScore,
   sendEmailToWorkers,
 } = require('../controllers/event.controller')
 
@@ -32,5 +33,7 @@ router.delete('/:id', authenticateAdmin, deleteEvent)
 // Send emails to the workers of an event
 router.post('/email-workers/:id', authenticateAdmin, sendEmailToWorkers)
 
+// Update score of a sport by admin
+router.patch('/score/:id', authenticateAdmin, updateScore)
 // * EXPORTS * //
 module.exports = router

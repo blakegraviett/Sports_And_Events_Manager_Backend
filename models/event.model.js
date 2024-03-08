@@ -13,11 +13,16 @@ const eventModel = new Schema({
     type: String,
     maxLength: 1000,
   },
-  isSport: {
-    type: Boolean,
+  sport: {
+    type: String,
+    enum: ['basketball', 'baseball', 'football', 'volleyball', 'other'],
     required: true,
-    default: false,
   },
+  period: [
+    {
+      type: String,
+    },
+  ],
   teams: [
     {
       type: Types.ObjectId,

@@ -2,6 +2,7 @@
 const Event = require('../models/event.model')
 const User = require('../models/user.model')
 const Team = require('../models/team.model')
+const Org = require('../models/org.model')
 const { successfulRes, unsuccessfulRes } = require('../lib/response')
 const { sendEmail } = require('../lib/email')
 const stripe = require('stripe')(process.env.STRIPE_SECRET)
@@ -57,7 +58,6 @@ const createEvent = async (req, res) => {
     teamNames,
     workerEmails,
     sport,
-    quantity,
     price: itemPrice,
   } = req.body
 
@@ -70,6 +70,9 @@ const createEvent = async (req, res) => {
   // Get the organization and the author from the user
   const { org, userId } = req.user
 
+  // find the organization
+  const foundOrg = await Org.findOne({ _id: org })
+
   // defaults
   let paymentLink = ''
   let paymentLinkID = ''
@@ -77,6 +80,8 @@ const createEvent = async (req, res) => {
   if (itemPrice) {
     const product = await stripe.products.create({
       name: 'Tickets for ' + name,
+      description: description,
+      images: [foundOrg.logo],
     })
 
     // ! CREATE STRIPE PAYMENT LINK
@@ -92,11 +97,6 @@ const createEvent = async (req, res) => {
       line_items: [
         {
           price: price.id,
-          adjustable_quantity: {
-            enabled: true,
-            minimum: 1,
-            maximum: quantity,
-          },
           quantity: 1,
         },
       ],

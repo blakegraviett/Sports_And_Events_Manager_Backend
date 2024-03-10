@@ -34,9 +34,6 @@ router.delete('/:id', authenticateAdmin, deleteEvent)
 // Send emails to the workers of an event
 router.post('/email-workers/:id', authenticateAdmin, sendEmailToWorkers)
 
-// send ticket purchase emails
-router.post('/ticket-purchase', purchaseTickets)
-
 // Update score of a sport by admin
 router.patch('/score/:id', authenticateAdmin, updateScore)
 // * EXPORTS * //

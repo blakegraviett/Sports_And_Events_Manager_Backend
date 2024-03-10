@@ -6,7 +6,9 @@ const Org = require('../models/org.model')
 const { successfulRes, unsuccessfulRes } = require('../lib/response')
 const { sendEmail } = require('../lib/email')
 const stripe = require('stripe')(process.env.STRIPE_SECRET)
-
+const qr = require('qrcode')
+const crypto = require('crypto')
+const Ticket = require('../models/ticket.model')
 // * CONTROLLERS * //
 // Get all events based on organization
 const getAllEvents = async (req, res) => {
@@ -322,7 +324,41 @@ const sendEmailToWorkers = async (req, res) => {
 }
 
 // send ticket purchase emails
-const purchaseTickets = async (req, res) => {}
+const purchaseTickets = async (req, res) => {
+  const event = req.body
+  switch (event.type) {
+    case 'payment_intent.succeeded': {
+      // ! SEND EMAIL ONLY IF PAYMENT IS SUCCESSFUL
+      // make a id for the ticket
+      const ticketId = crypto.randomBytes(60).toString('hex')
+
+      // qr code link
+      const origin = `http://localhost:4200/tickets/${ticketId}`
+
+      //.createRequestcode
+      const qrCode = await qr.toString(origin, {
+        errorCorrectionLevel: 'H',
+        type: 'svg',
+      })
+
+      // create the ticket
+      await Ticket.create({
+        ticketId,
+      })
+
+      // send email to the user
+      await sendEmail({
+        from: 'sportal@sportal.com',
+        to: event['data']['object']['receipt_email'],
+        subject: 'Ticket Purchase',
+        html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <p style="width:250px">${qrCode}</p>`,
+      })
+    }
+    default:
+      // Unexpected event type
+      return res.status(400).end()
+  }
+}
 
 // * EXPORTS * //
 module.exports = {

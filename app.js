@@ -37,6 +37,9 @@ app.use('/api/v1/orgs', require('./routes/org.routes'))
 // Teams Router
 app.use('/api/v1/teams', require('./routes/team.routes'))
 
+// Tickets Router
+app.use('/api/v1/tickets', require('./routes/tickets.routes'))
+
 // 404 Handler
 app.use(notFoundHandler)
 

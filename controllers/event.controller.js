@@ -2,9 +2,13 @@
 const Event = require('../models/event.model')
 const User = require('../models/user.model')
 const Team = require('../models/team.model')
+const Org = require('../models/org.model')
 const { successfulRes, unsuccessfulRes } = require('../lib/response')
 const { sendEmail } = require('../lib/email')
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET)
+const qr = require('qrcode')
+const crypto = require('crypto')
+const Ticket = require('../models/ticket.model')
 // * CONTROLLERS * //
 // Get all events based on organization
 const getAllEvents = async (req, res) => {
@@ -48,8 +52,16 @@ const getSingleEvent = async (req, res) => {
 // Creat event for an organization by admin
 const createEvent = async (req, res) => {
   // Get the information from the request body
-  const { name, location, date, description, teamNames, workerEmails, sport } =
-    req.body
+  const {
+    name,
+    location,
+    date,
+    description,
+    teamNames,
+    workerEmails,
+    sport,
+    price: itemPrice,
+  } = req.body
 
   // Get the workers from there email address
   const workers = await User.find({ email: workerEmails })
@@ -59,6 +71,41 @@ const createEvent = async (req, res) => {
 
   // Get the organization and the author from the user
   const { org, userId } = req.user
+
+  // find the organization
+  const foundOrg = await Org.findOne({ _id: org })
+
+  // defaults
+  let paymentLink = ''
+  let paymentLinkID = ''
+
+  if (itemPrice) {
+    const product = await stripe.products.create({
+      name: 'Tickets for ' + name,
+      description: description,
+      images: [foundOrg.logo],
+    })
+
+    // ! CREATE STRIPE PAYMENT LINK
+    // Create a new price point for our secret image product
+    const price = await stripe.prices.create({
+      currency: 'usd',
+      unit_amount: itemPrice * 100,
+      product: product.id,
+    })
+
+    // Create a new payment session with that price id
+    paymentLink = await stripe.paymentLinks.create({
+      line_items: [
+        {
+          price: price.id,
+          quantity: 1,
+        },
+      ],
+    })
+
+    paymentLinkID = paymentLink.id
+  }
 
   // Create the event
   const newEvent = await Event.create({
@@ -70,7 +117,9 @@ const createEvent = async (req, res) => {
     teams,
     workers,
     org,
+    paymentLinkID: paymentLink.id,
     author: userId,
+    ticketLink: paymentLink.url,
   })
 
   // send back the created event
@@ -192,6 +241,21 @@ const deleteEvent = async (req, res) => {
     return unsuccessfulRes({ res })
   }
 
+  //find the event
+  const foundEvent = await Event.findOne({ _id: id })
+
+  // if no event, return error
+  if (!foundEvent) {
+    return unsuccessfulRes({ res, status: 404, msg: 'Event not found' })
+  }
+
+  // deactivate the events payment link if there is one
+  if (foundEvent.paymentLinkID) {
+    await stripe.paymentLinks.update(foundEvent.paymentLinkID, {
+      active: false,
+    })
+  }
+
   // Delete the event
   const deletedEvent = await Event.findOneAndDelete({ _id: id })
 
@@ -259,6 +323,43 @@ const sendEmailToWorkers = async (req, res) => {
   return successfulRes({ res, data: workersEmails })
 }
 
+// send ticket purchase emails
+const purchaseTickets = async (req, res) => {
+  const event = req.body
+  switch (event.type) {
+    case 'payment_intent.succeeded': {
+      // ! SEND EMAIL ONLY IF PAYMENT IS SUCCESSFUL
+      // make a id for the ticket
+      const ticketId = crypto.randomBytes(60).toString('hex')
+
+      // qr code link
+      const origin = `http://localhost:4200/tickets/${ticketId}`
+
+      //.createRequestcode
+      const qrCode = await qr.toString(origin, {
+        errorCorrectionLevel: 'H',
+        type: 'svg',
+      })
+
+      // create the ticket
+      await Ticket.create({
+        ticketId,
+      })
+
+      // send email to the user
+      await sendEmail({
+        from: 'sportal@sportal.com',
+        to: event['data']['object']['receipt_email'],
+        subject: 'Ticket Purchase',
+        html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <p style="width:250px">${qrCode}</p>`,
+      })
+    }
+    default:
+      // Unexpected event type
+      return res.status(400).end()
+  }
+}
+
 // * EXPORTS * //
 module.exports = {
   getAllEvents,
@@ -267,5 +368,6 @@ module.exports = {
   updateEvent,
   deleteEvent,
   sendEmailToWorkers,
+  purchaseTickets,
   updateScore,
 }

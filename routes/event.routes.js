@@ -11,6 +11,7 @@ const {
   updateEvent,
   deleteEvent,
   updateScore,
+  purchaseTickets,
   sendEmailToWorkers,
 } = require('../controllers/event.controller')
 

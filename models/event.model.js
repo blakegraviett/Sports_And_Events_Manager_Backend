@@ -29,6 +29,12 @@ const eventModel = new Schema({
       ref: 'Team',
     },
   ],
+  ticketLink: {
+    type: String,
+  },
+  paymentLinkID: {
+    type: String,
+  },
   location: {
     type: String,
     required: true,

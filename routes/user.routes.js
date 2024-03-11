@@ -19,7 +19,7 @@ router.get('/', authenticateAdmin, getAllUsersByOrg)
 router.get('/:id', authenticateAdmin, getSingleUser)
 
 // Make a user an admin
-router.patch('/update-admin/:id', authenticateAdmin, updateUserAdmin)
+router.patch('/update-admin/:id', authenticateOwner, updateUserAdmin)
 
 // Demote a user to a standard user
 router.patch('/demote-admin/:id', authenticateOwner, demoteUserAdmin)

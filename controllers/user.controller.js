@@ -26,9 +26,11 @@ const getAllUsersByOrg = async (req, res) => {
     let name = currentObject.name
     let email = currentObject.email
     let id = currentObject._id
+    let role = currentObject.role
+    let org = currentObject.org
 
     // Printing or using the properties
-    user.push({ name, email, id })
+    user.push({ name, email, id, role, org })
   }
 
   // return all users
@@ -65,12 +67,82 @@ const getSingleUser = async (req, res) => {
       name: user.name,
       email: user.email,
       id: user._id,
+      role: user.role,
     },
   })
 }
 
+// make a user an admin
+const updateUserAdmin = async (req, res) => {
+  // get the organization from the admin
+  const { org } = req.user
+
+  // get the id from the request params
+  const { id } = req.params
+
+  // find the user by id
+  const foundUser = await User.findById(id)
+
+  // check to see if the user exists
+  if (!foundUser) {
+    return unsuccessfulRes({ res, msg: 'No user found' })
+  }
+
+  // check to see if the user belongs to the organization
+  if (foundUser.org != org) {
+    return unsuccessfulRes({ res, msg: 'User not in your organization' })
+  }
+
+  // if the user is already an admin, return error
+  if (foundUser.role === 'admin') {
+    return unsuccessfulRes({ res, msg: 'User is already an admin' })
+  }
+
+  // if the user is not an admin, make them an admin
+  foundUser.role = 'admin'
+  await foundUser.save()
+
+  // return success
+  return successfulRes({ res, msg: 'User is now an admin' })
+}
+
+// demote a user from admin
+const demoteUserAdmin = async (req, res) => {
+  // get the organization from the admin
+  const { org } = req.user
+
+  // get the id from the request params
+  const { id } = req.params
+
+  // find the user by id
+  const foundUser = await User.findById(id)
+
+  // check to see if the user exists
+  if (!foundUser) {
+    return unsuccessfulRes({ res, msg: 'No user found' })
+  }
+
+  // check to see if the user belongs to the organization
+  if (foundUser.org != org) {
+    return unsuccessfulRes({ res, msg: 'User not in your organization' })
+  }
+
+  // if the user is not an admin, return error
+  if (foundUser.role !== 'admin') {
+    return unsuccessfulRes({ res, msg: 'User is not an admin' })
+  }
+
+  // if the user is already an admin, demote them from admin
+  foundUser.role = 'user'
+  await foundUser.save()
+
+  // return success
+  return successfulRes({ res, msg: 'User is no longer an admin' })
+}
 // * EXPORTS * //
 module.exports = {
   getAllUsersByOrg,
   getSingleUser,
+  updateUserAdmin,
+  demoteUserAdmin,
 }

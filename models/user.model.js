@@ -28,7 +28,7 @@ const userModel = new Schema({
   role: {
     type: String,
     required: true,
-    enum: ['user', 'admin', 'worker'],
+    enum: ['user', 'admin', 'owner'],
     default: 'user',
   },
   org: {

@@ -1,7 +1,7 @@
 // * IMPORTS * //
 const router = require('express').Router()
 const {
-  authenticateUser,
+  authenticateOwner,
   authenticateAdmin,
 } = require('../middleware/auth.middleware')
 const {
@@ -22,7 +22,7 @@ router.get('/:id', authenticateAdmin, getSingleUser)
 router.patch('/update-admin/:id', authenticateAdmin, updateUserAdmin)
 
 // Demote a user to a standard user
-router.patch('/demote-admin/:id', authenticateAdmin, demoteUserAdmin)
+router.patch('/demote-admin/:id', authenticateOwner, demoteUserAdmin)
 
 // * EXPORTS * //
 module.exports = router

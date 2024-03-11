@@ -1,6 +1,10 @@
 // * IMPORTS * //
 const router = require('express').Router()
 const {
+  authenticateUser,
+  authenticateAdmin,
+} = require('../middleware/auth.middleware')
+const {
   loginUser,
   registerUser,
   verifyEmail,
@@ -18,7 +22,7 @@ router.post('/register', registerUser)
 router.post('/verify-email', verifyEmail)
 
 // Logout
-router.delete('/logout', logoutUser)
+router.delete('/logout', authenticateUser, logoutUser)
 
 // * EXPORTS * //
 module.exports = router

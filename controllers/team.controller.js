@@ -1,6 +1,8 @@
 // * IMPORTS * //
 const Team = require('../models/team.model')
 const { successfulRes, unsuccessfulRes } = require('../lib/response')
+const cloudinary = require('cloudinary').v2
+const fs = require('fs')
 
 // * CONTROLLERS * //
 // get all teams based on organization
@@ -106,6 +108,19 @@ const deleteSingleTeam = async (req, res) => {
   return successfulRes({ res, data: { msg: 'Successfully delted team' } })
 }
 
+// Upload team logo
+async function uploadSingleImageToCloudinary(req, res) {
+  const result = await cloudinary.uploader.upload(req.files.img.tempFilePath, {
+    use_filename: true,
+    folder: 'team_logos',
+  })
+
+  fs.unlinkSync(req.files.img.tempFilePath)
+
+  // send success message
+  successfulRes({ res, data: { src: result.secure_url } })
+}
+
 // * EXPORTS * //
 module.exports = {
   getAllTeams,
@@ -113,4 +128,5 @@ module.exports = {
   createTeam,
   updateTeam,
   deleteSingleTeam,
+  uploadSingleImageToCloudinary,
 }

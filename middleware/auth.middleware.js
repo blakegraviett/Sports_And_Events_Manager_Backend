@@ -75,6 +75,33 @@ const authenticateAdmin = async (req, res, next) => {
       // use the next middleware function
       return next()
     }
+
+    if (!refreshToken) {
+      return unauthorizedRes({ res })
+    }
+
+    // f there is no access token then verify the refresh token
+    const { payload } = jwt.verify(refreshToken, process.env.JWT_SECRET)
+
+    // Find the exsiting token
+    const exsisitingToken = await Token.findOne({
+      user: payload.user.userId,
+      refreshToken: payload.refreshToken,
+    })
+
+    if (!exsisitingToken || !exsisitingToken.isValid) {
+      return unauthorizedRes({ res })
+    }
+
+    // attach cookies to response with the user information
+    attachCookiesToResponse({
+      res,
+      user: payload.user,
+      refreshToken: exsisitingToken.refreshToken,
+    })
+
+    // continue with the next middleware function
+    next()
   } catch (error) {
     return unsuccessfulRes({ res, data: error })
   }

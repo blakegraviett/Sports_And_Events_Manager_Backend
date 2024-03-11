@@ -10,6 +10,7 @@ const {
   createTeam,
   updateTeam,
   deleteSingleTeam,
+  uploadSingleImageToCloudinary,
 } = require('../controllers/team.controller')
 
 // * ROUTES * //
@@ -27,6 +28,8 @@ router.patch('/:id', authenticateAdmin, updateTeam)
 
 // delete team based on organization
 router.delete('/:id', authenticateAdmin, deleteSingleTeam)
+
+router.post('/upload-image', authenticateAdmin, uploadSingleImageToCloudinary)
 
 // * EXPORTS * //
 module.exports = router

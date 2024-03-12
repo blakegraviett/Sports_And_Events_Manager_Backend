@@ -9,6 +9,7 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET)
 const qr = require('qrcode')
 const crypto = require('crypto')
 const Ticket = require('../models/ticket.model')
+
 // * CONTROLLERS * //
 // Get all events based on organization
 const getAllEvents = async (req, res) => {
@@ -60,6 +61,7 @@ const createEvent = async (req, res) => {
     teamNames,
     workerEmails,
     sport,
+    links,
     price: itemPrice,
   } = req.body
 
@@ -117,6 +119,7 @@ const createEvent = async (req, res) => {
     teams,
     workers,
     org,
+    links,
     paymentLinkID: paymentLink.id,
     author: userId,
     ticketLink: paymentLink.url,

@@ -66,9 +66,9 @@ const authenticateAdmin = async (req, res, next) => {
 
       // put it in the req.user object
       req.user = payload.user
-
+      
       // check to see if the user is an admin
-      if (req.user.role !== 'admin') {
+      if (req.user.role !== 'admin' && req.user.role !== 'owner') {
         return unauthorizedRes({ res })
       }
 

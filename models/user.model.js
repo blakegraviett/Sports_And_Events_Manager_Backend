@@ -42,6 +42,8 @@ const userModel = new Schema({
   },
   verificationToken: String,
   verifiedAt: Date,
+  passwordToken: String,
+  passwordTokenExpireDate: Date,
 })
 
 // * METHODS * //

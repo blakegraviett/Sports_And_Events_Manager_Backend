@@ -190,6 +190,75 @@ const loginUser = async (req, res) => {
   successfulRes({ res, data: { user: tokenUser } })
 }
 
+// Forgot Password Controller
+const forgotPassword = async (req, res) => {
+  // Extract email from request
+  const { email } = req.body;
+
+  // Check for email
+  if (!email) {
+    return res.status(400).json({ msg: 'Please provide email' });
+  }
+
+  // Find User
+  const user = await User.findOne({ email });
+
+  if (user) {
+    // Create password token
+    const passwordToken = crypto.randomBytes(70).toString('hex');
+
+    // Send email
+    await sendResetPassswordEmail({
+      name: user.name,
+      email: user.email,
+      token: passwordToken,
+      origin: 'http://localhost:4200',
+    });
+
+    // Ten Minutes
+    const tenMinutes = 1000 * 60 * 10;
+    // Password Token Expire Date
+    const passwordTokenExpireDate = new Date(Date.now() + tenMinutes);
+
+    user.passwordToken = passwordToken;
+    user.passwordTokenExpireDate = passwordTokenExpireDate;
+    await user.save();
+
+    // send sucess message
+    res.status(200).json({ msg: 'Password Reset Email Sent' });
+  }
+};
+
+// Reset Password
+const resetPassword = async (req, res) => {
+  // Extract email, token, and password from request
+  const { email, token, password } = req.body;
+
+  // Check for email, token, and password
+  if (!token || !email || !password) {
+    return res.status(400).json({ msg: 'Please Provide All Values' });
+  }
+
+  // Find User
+  const user = await User.findOne({ email });
+
+  if (user) {
+    // Current Date
+    const currentDate = Date.now();
+    if (
+      user.passwordToken === token &&
+      user.passwordTokenExpireDate > currentDate
+    ) {
+      user.password = password;
+      user.passwordToken = null;
+      user.passwordTokenExpireDate = null;
+      await user.save();
+    }
+  }
+
+  res.status(200).json({ msg: 'Password Reset' });
+};
+
 // Logout User
 const logoutUser = async (req, res) => {
   // get the user and delete the token
@@ -215,4 +284,6 @@ module.exports = {
   registerUser,
   verifyEmail,
   logoutUser,
+  forgotPassword,
+  resetPassword,
 }

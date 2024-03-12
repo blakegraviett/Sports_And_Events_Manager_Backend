@@ -9,6 +9,8 @@ const {
   registerUser,
   verifyEmail,
   logoutUser,
+  forgotPassword,
+  resetPassword,
 } = require('../controllers/auth.controller')
 
 // * ROUTES * //
@@ -24,5 +26,10 @@ router.post('/verify-email', verifyEmail)
 // Logout
 router.delete('/logout', authenticateUser, logoutUser)
 
+// Forgot Password
+router.post('/forgot-password', forgotPassword);
+
+// Reset Password
+router.post('/reset-password', resetPassword);
 // * EXPORTS * //
 module.exports = router

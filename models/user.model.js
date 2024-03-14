@@ -61,7 +61,8 @@ userModel.pre('save', async function () {
 
 // compare the incoming password with the hashed password
 userModel.methods.comparePassword = async function (incommingPassword) {
-  return await bcrypt.compare(incommingPassword, this.password)
+  const isMatch = await bcrypt.compare(incommingPassword, this.password)
+  return isMatch
 }
 
 // Generate a JWT token

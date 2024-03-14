@@ -62,6 +62,8 @@ userModel.pre('save', async function () {
 // compare the incoming password with the hashed password
 userModel.methods.comparePassword = async function (incommingPassword) {
   const isMatch = await bcrypt.compare(incommingPassword, this.password)
+  console.log('isMatch:', isMatch)
+
   return isMatch
 }
 

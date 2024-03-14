@@ -116,7 +116,7 @@ const loginUser = async (req, res) => {
   }
 
   // check if password is correct
-  const isMatch = user.comparePassword(password)
+  const isMatch = await user.comparePassword(password)
 
   // if password is not correct, return error
   if (!isMatch) {

@@ -269,12 +269,14 @@ const logoutUser = async (req, res) => {
     expires: new Date(Date.now()),
     httpOnly: true,
     sameSite: 'none',
+    secure: true,
   })
 
   res.cookie('refreshToken', 'logout', {
     expires: new Date(Date.now()),
     httpOnly: true,
     sameSite: 'none',
+    secure: true,
   })
 
   return successfulRes({ res })

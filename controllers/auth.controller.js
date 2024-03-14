@@ -193,19 +193,19 @@ const loginUser = async (req, res) => {
 // Forgot Password Controller
 const forgotPassword = async (req, res) => {
   // Extract email from request
-  const { email } = req.body;
+  const { email } = req.body
 
   // Check for email
   if (!email) {
-    return res.status(400).json({ msg: 'Please provide email' });
+    return res.status(400).json({ msg: 'Please provide email' })
   }
 
   // Find User
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email })
 
   if (user) {
     // Create password token
-    const passwordToken = crypto.randomBytes(70).toString('hex');
+    const passwordToken = crypto.randomBytes(70).toString('hex')
 
     // Send email
     await sendResetPassswordEmail({
@@ -213,51 +213,51 @@ const forgotPassword = async (req, res) => {
       email: user.email,
       token: passwordToken,
       origin: 'http://localhost:4200',
-    });
+    })
 
     // Ten Minutes
-    const tenMinutes = 1000 * 60 * 10;
+    const tenMinutes = 1000 * 60 * 10
     // Password Token Expire Date
-    const passwordTokenExpireDate = new Date(Date.now() + tenMinutes);
+    const passwordTokenExpireDate = new Date(Date.now() + tenMinutes)
 
-    user.passwordToken = passwordToken;
-    user.passwordTokenExpireDate = passwordTokenExpireDate;
-    await user.save();
+    user.passwordToken = passwordToken
+    user.passwordTokenExpireDate = passwordTokenExpireDate
+    await user.save()
 
     // send sucess message
-    res.status(200).json({ msg: 'Password Reset Email Sent' });
+    res.status(200).json({ msg: 'Password Reset Email Sent' })
   }
-};
+}
 
 // Reset Password
 const resetPassword = async (req, res) => {
   // Extract email, token, and password from request
-  const { email, token, password } = req.body;
+  const { email, token, password } = req.body
 
   // Check for email, token, and password
   if (!token || !email || !password) {
-    return res.status(400).json({ msg: 'Please Provide All Values' });
+    return res.status(400).json({ msg: 'Please Provide All Values' })
   }
 
   // Find User
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email })
 
   if (user) {
     // Current Date
-    const currentDate = Date.now();
+    const currentDate = Date.now()
     if (
       user.passwordToken === token &&
       user.passwordTokenExpireDate > currentDate
     ) {
-      user.password = password;
-      user.passwordToken = null;
-      user.passwordTokenExpireDate = null;
-      await user.save();
+      user.password = password
+      user.passwordToken = null
+      user.passwordTokenExpireDate = null
+      await user.save()
     }
   }
 
-  res.status(200).json({ msg: 'Password Reset' });
-};
+  res.status(200).json({ msg: 'Password Reset' })
+}
 
 // Logout User
 const logoutUser = async (req, res) => {

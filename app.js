@@ -30,7 +30,13 @@ app.use(express.json())
 app.use(fileUpload({ useTempFiles: true }))
 app.use(cookieParser(process.env.JWT_SECRET))
 app.use(helmet())
-app.use(cors())
+app.use(
+  cors({
+    // ! NEED TO SEND COOKIES TO ALL ORIGINS
+    origin: [process.env.DEVELOPMENT_ORGIN, process.env.PRODUCTION_ORIGIN],
+    credentials: true,
+  })
+)
 app.use(xss())
 
 // * ROUTES * //

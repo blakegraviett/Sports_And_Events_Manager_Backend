@@ -61,7 +61,7 @@ const createEvent = async (req, res) => {
     teamNames,
     workerEmails,
     sport,
-    links,
+    link,
     price: itemPrice,
   } = req.body
 
@@ -132,7 +132,7 @@ const createEvent = async (req, res) => {
 // Update event for an organization by admin
 const updateEvent = async (req, res) => {
   // Get the information from the request body
-  const { name, location, date, description, teamNames, workerEmails } =
+  const { name, location, date, description, teamNames, workerEmails, link } =
     req.body
 
   // default values
@@ -166,6 +166,7 @@ const updateEvent = async (req, res) => {
       description,
       teams,
       workers,
+      link,
     },
     { new: true }
   )

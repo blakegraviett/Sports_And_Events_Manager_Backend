@@ -71,6 +71,7 @@ const createEvent = async (req, res) => {
 
   // find the teams by name
   const foundHomeTeam = await Team.find({ name: homeTeam })
+
   const foundAwayTeam = await Team.find({ name: awayTeam })
 
   // Get the organization and the author from the user
@@ -119,8 +120,8 @@ const createEvent = async (req, res) => {
     sport,
     description,
     teams: {
-      homeTeam: foundHomeTeam._id,
-      awayTeam: foundAwayTeam._id,
+      homeTeam: foundHomeTeam[0]._id,
+      awayTeam: foundAwayTeam[0]._id,
     },
     workers,
     org,
@@ -176,8 +177,8 @@ const updateEvent = async (req, res) => {
       date,
       description,
       teams: {
-        homeTeam: foundHomeTeam._id,
-        awayTeam: foundAwayTeam._id,
+        homeTeam: foundHomeTeam[0]._id,
+        awayTeam: foundAwayTeam[0]._id,
       },
       workers,
       link,

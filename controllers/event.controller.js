@@ -58,7 +58,8 @@ const createEvent = async (req, res) => {
     location,
     date,
     description,
-    teamNames,
+    awayTeam,
+    homeTeam,
     workerEmails,
     sport,
     link,
@@ -69,7 +70,8 @@ const createEvent = async (req, res) => {
   const workers = await User.find({ email: workerEmails })
 
   // find the teams by name
-  const teams = await Team.find({ name: teamNames })
+  const foundHomeTeam = await Team.find({ name: homeTeam })
+  const foundAwayTeam = await Team.find({ name: awayTeam })
 
   // Get the organization and the author from the user
   const { org, userId } = req.user
@@ -116,10 +118,13 @@ const createEvent = async (req, res) => {
     date,
     sport,
     description,
-    teams,
+    teams: {
+      homeTeam: foundHomeTeam._id,
+      awayTeam: foundAwayTeam._id,
+    },
     workers,
     org,
-    links,
+    link,
     paymentLinkID: paymentLink.id,
     author: userId,
     ticketLink: paymentLink.url,
@@ -132,8 +137,16 @@ const createEvent = async (req, res) => {
 // Update event for an organization by admin
 const updateEvent = async (req, res) => {
   // Get the information from the request body
-  const { name, location, date, description, teamNames, workerEmails, link } =
-    req.body
+  const {
+    name,
+    location,
+    date,
+    description,
+    awayTeam,
+    homeTeam,
+    workerEmails,
+    link,
+  } = req.body
 
   // default values
   let workers = workerEmails
@@ -144,10 +157,8 @@ const updateEvent = async (req, res) => {
     workers = await User.find({ email: workerEmails })
   }
   // find the teams by name
-  if (teamNames) {
-    teams = await Team.find({ name: teamNames })
-  }
-
+  const foundHomeTeam = await Team.find({ name: homeTeam })
+  const foundAwayTeam = await Team.find({ name: awayTeam })
   // Get the id from the parameter
   const { id } = req.params
 
@@ -164,7 +175,10 @@ const updateEvent = async (req, res) => {
       location,
       date,
       description,
-      teams,
+      teams: {
+        homeTeam: foundHomeTeam._id,
+        awayTeam: foundAwayTeam._id,
+      },
       workers,
       link,
     },

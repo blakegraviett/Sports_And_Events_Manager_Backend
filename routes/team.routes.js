@@ -15,10 +15,10 @@ const {
 
 // * ROUTES * //
 // get all teams based on organization
-router.get('/', authenticateAdmin, getAllTeams)
+router.get('/', authenticateUser, getAllTeams)
 
 // get single team based on organization by id
-router.get('/:id', authenticateAdmin, getSingleTeam)
+router.get('/:id', authenticateUser, getSingleTeam)
 
 // create new team based on organization
 router.post('/', authenticateAdmin, createTeam)

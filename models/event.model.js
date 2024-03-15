@@ -23,12 +23,16 @@ const eventModel = new Schema({
       type: String,
     },
   ],
-  teams: [
-    {
+  teams: {
+    homeTeam: {
       type: Types.ObjectId,
       ref: 'Team',
     },
-  ],
+    awayTeam: {
+      type: Types.ObjectId,
+      ref: 'Team',
+    },
+  },
   ticketLink: {
     type: String,
   },

@@ -64,8 +64,8 @@ const eventModel = new Schema({
   links: [
     {
       type: String,
-    }
-  ]
+    },
+  ],
 })
 
 // * EXPORTS * //

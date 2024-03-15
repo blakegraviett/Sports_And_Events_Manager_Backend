@@ -185,10 +185,10 @@ const updateScore = async (req, res) => {
   }
 
   // Get the information from the request body
-  const { score } = req.body
+  const { homeTeamScore, awayTeamScore } = req.body
 
   // if no score, return error
-  if (!score) {
+  if (!homeTeamScore || !awayTeamScore) {
     return unsuccessfulRes({ res })
   }
 
@@ -207,13 +207,13 @@ const updateScore = async (req, res) => {
   let period = ''
 
   if (sport === 'baseball') {
-    period = 'innging'
+    period = 'Innging'
   }
   if (sport === 'football' || sport === 'basketball') {
-    period = 'quarter'
+    period = 'Quarter'
   }
   if (sport === 'volleyball') {
-    period = 'game'
+    period = 'Game'
   }
 
   // defauly peiord ammount
@@ -224,8 +224,18 @@ const updateScore = async (req, res) => {
     periodAmount = foundEvent.period.length
   }
 
+  // Find the tems in the event
+  const teams = await Team.find({ _id: foundEvent.teams })
+  let homeTeam = teams[0].name
+  let awayTeam = teams[1].name
+  // get the name for each team
+
   // add the new period to the event
-  foundEvent.period.push(`${periodAmount + 1} ${period} : ${score}`)
+  foundEvent.period.push(
+    `${period} ${
+      periodAmount + 1
+    } : ${homeTeam}: ${homeTeamScore} - ${awayTeam}: ${awayTeamScore}`
+  )
 
   // save the update to the database
   await foundEvent.save()

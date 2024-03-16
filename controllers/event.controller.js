@@ -151,7 +151,6 @@ const updateEvent = async (req, res) => {
 
   // default values
   let workers = workerEmails
-  let teams = teamNames
 
   // Get the workers from there email address
   if (workerEmails) {
@@ -160,6 +159,8 @@ const updateEvent = async (req, res) => {
   // find the teams by name
   const foundHomeTeam = await Team.find({ name: homeTeam })
   const foundAwayTeam = await Team.find({ name: awayTeam })
+  console.log('foundHomeTeam:', foundHomeTeam)
+
   // Get the id from the parameter
   const { id } = req.params
 
@@ -167,7 +168,6 @@ const updateEvent = async (req, res) => {
   if (!id) {
     return unsuccessfulRes({ res })
   }
-
   // update the event with the information from the request body
   const updatedEvent = await Event.findOneAndUpdate(
     { _id: id },

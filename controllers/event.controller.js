@@ -138,28 +138,23 @@ const createEvent = async (req, res) => {
 // Update event for an organization by admin
 const updateEvent = async (req, res) => {
   // Get the information from the request body
-  const {
-    name,
-    location,
-    date,
-    description,
-    awayTeam,
-    homeTeam,
-    workerEmails,
-    link,
-  } = req.body
+  const { name, location, date, description, awayTeam, homeTeam, link } =
+    req.body
+  let { workers } = req.body
 
-  // default values
-  let workers = workerEmails
-
-  // Get the workers from there email address
-  if (workerEmails) {
-    workers = await User.find({ email: workerEmails })
+  // Get the workers from there email address and convert them to Ids
+  if (workers) {
+    const workersIds = []
+    for (const worker of workers) {
+      const singleWorker = await User.find({ email: worker })
+      workersIds.push(singleWorker[0]._id)
+    }
+    workers = workersIds
   }
+
   // find the teams by name
-  const foundHomeTeam = await Team.find({ name: homeTeam })
-  const foundAwayTeam = await Team.find({ name: awayTeam })
-  console.log('foundHomeTeam:', foundHomeTeam)
+  let foundHomeTeam = await Team.find({ name: homeTeam })
+  let foundAwayTeam = await Team.find({ name: awayTeam })
 
   // Get the id from the parameter
   const { id } = req.params
@@ -168,6 +163,17 @@ const updateEvent = async (req, res) => {
   if (!id) {
     return unsuccessfulRes({ res })
   }
+
+  // if no team then return old team
+  if (!awayTeam) {
+    const foundEvent = await Event.findOne({ _id: id })
+    foundAwayTeam[0] = { _id: foundEvent.teams.awayTeam }
+  }
+  if (!homeTeam) {
+    const foundEvent = await Event.findOne({ _id: id })
+    foundHomeTeam[0] = { _id: foundEvent.teams.homeTeam }
+  }
+
   // update the event with the information from the request body
   const updatedEvent = await Event.findOneAndUpdate(
     { _id: id },

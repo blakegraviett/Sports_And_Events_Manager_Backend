@@ -39,11 +39,6 @@ const eventModel = new Schema({
   paymentLinkID: {
     type: String,
   },
-  location: {
-    type: String,
-    required: true,
-    maxLength: 1000,
-  },
   date: {
     type: Date,
     // ! CHANGE BACK AFTER DEVELOPMENT

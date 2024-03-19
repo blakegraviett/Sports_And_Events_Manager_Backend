@@ -64,6 +64,7 @@ const createEvent = async (req, res) => {
     sport,
     link,
     price: itemPrice,
+    ticketAmount,
   } = req.body
 
   // Get the workers from there email address
@@ -107,6 +108,11 @@ const createEvent = async (req, res) => {
           quantity: 1,
         },
       ],
+      restrictions: {
+        completed_sessions: {
+          limit: ticketAmount,
+        },
+      },
     })
 
     paymentLinkID = paymentLink.id

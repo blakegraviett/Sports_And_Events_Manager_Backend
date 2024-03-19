@@ -40,7 +40,7 @@ const eventModel = new Schema({
     type: String,
   },
   date: {
-    type: Date,
+    type: String,
     // ! CHANGE BACK AFTER DEVELOPMENT
     // required: true,
   },

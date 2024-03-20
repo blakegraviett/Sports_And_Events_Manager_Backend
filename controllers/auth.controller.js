@@ -282,6 +282,17 @@ const logoutUser = async (req, res) => {
   return successfulRes({ res })
 }
 
+// Get User Profile
+const getUserProfile = async (req, res) => {
+  const user = await User.findOne({ _id: req.user.userId })
+
+  // only return the users { role, name, and email }
+  return successfulRes({
+    res,
+    data: { name: user.name, email: user.email, role: user.role },
+  })
+}
+
 // * EXPORTS * //
 module.exports = {
   loginUser,
@@ -290,4 +301,5 @@ module.exports = {
   logoutUser,
   forgotPassword,
   resetPassword,
+  getUserProfile,
 }

@@ -12,7 +12,7 @@ const {
   deleteSingleTeam,
   uploadSingleImageToCloudinary,
 } = require('../controllers/team.controller')
-
+const app = express()
 // * ROUTES * //
 // get all teams based on organization
 router.get('/', authenticateUser, getAllTeams)
@@ -29,7 +29,17 @@ router.patch('/:id', authenticateAdmin, updateTeam)
 // delete team based on organization
 router.delete('/:id', authenticateAdmin, deleteSingleTeam)
 
-router.post('/upload-image', authenticateAdmin, uploadSingleImageToCloudinary)
+router.post(
+  '/upload-image',
+  authenticateAdmin,
+  app.use(
+    app.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*')
+      next()
+    })
+  ),
+  uploadSingleImageToCloudinary
+)
 
 // * EXPORTS * //
 module.exports = router

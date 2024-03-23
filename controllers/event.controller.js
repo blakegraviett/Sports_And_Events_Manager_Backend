@@ -253,16 +253,14 @@ const updateScore = async (req, res) => {
   }
 
   // Find the tems in the event
-  const teams = await Team.find({ _id: foundEvent.teams })
-  let homeTeam = teams[0].name
-  let awayTeam = teams[1].name
-  // get the name for each team
+  const homeTeam = await Team.find({ _id: foundEvent.teams.homeTeam._id })
+  const awayTeam = await Team.find({ _id: foundEvent.teams.awayTeam._id })
 
   // add the new period to the event
   foundEvent.period.push(
-    `${period} ${
-      periodAmount + 1
-    } : ${homeTeam}: ${homeTeamScore} - ${awayTeam}: ${awayTeamScore}`
+    `${period} ${periodAmount + 1} : ${homeTeam[0].name}: ${homeTeamScore} - ${
+      awayTeam[0].name
+    }: ${awayTeamScore}`
   )
 
   // save the update to the database

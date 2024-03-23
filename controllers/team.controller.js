@@ -117,7 +117,7 @@ async function uploadSingleImageToCloudinary(req, res) {
 
   fs.unlinkSync(req.files.img.tempFilePath)
 
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200')
+  res.header('Access-Control-Allow-Origin', 'http://localhost:4200')
   // send success message
   successfulRes({ res, data: { src: result.secure_url } })
 }

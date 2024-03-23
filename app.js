@@ -33,7 +33,7 @@ app.use(helmet())
 app.use(
   cors({
     // ! NEED TO SEND COOKIES TO ALL ORIGINS
-    origin: [process.env.DEVELOPMENT_ORGIN, process.env.PRODUCTION_ORIGIN],
+    origin: ['http://localhost:4200', process.env.PRODUCTION_ORIGIN],
     credentials: true,
   })
 )

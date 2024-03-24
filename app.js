@@ -7,6 +7,25 @@ const cookieParser = require('cookie-parser')
 const fileUpload = require('express-fileupload')
 const cloudinary = require('cloudinary').v2
 
+// ! DEV
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      process.env.DEVELOPMENT_ORIGIN,
+      process.env.PRODUCTION_ORIGIN,
+    ]
+
+    // Check if the request's origin is included in the allowed origins
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+    } else {
+      // If the origin is not allowed, return an error
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
+  credentials: true,
+}
+
 // Functions
 const connectToDB = require('./lib/mongoose')
 const notFoundHandler = require('./middleware/404.middleware')
@@ -30,13 +49,7 @@ app.use(express.json())
 app.use(fileUpload({ useTempFiles: true }))
 app.use(cookieParser(process.env.JWT_SECRET))
 app.use(helmet())
-app.use(
-  cors({
-    // ! NEED TO SEND COOKIES TO ALL ORIGINS
-    origin: [process.env.DEVELOPMENT_ORGIN, process.env.PRODUCTION_ORIGIN],
-    credentials: true,
-  })
-)
+app.use(cors(corsOptions))
 app.use(xss())
 
 // * ROUTES * //

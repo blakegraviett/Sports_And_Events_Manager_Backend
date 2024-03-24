@@ -11,6 +11,7 @@ const {
   logoutUser,
   forgotPassword,
   resetPassword,
+  getUserProfile,
 } = require('../controllers/auth.controller')
 
 // * ROUTES * //
@@ -27,9 +28,12 @@ router.post('/verify-email', verifyEmail)
 router.delete('/logout', authenticateUser, logoutUser)
 
 // Forgot Password
-router.post('/forgot-password', forgotPassword);
+router.post('/forgot-password', forgotPassword)
 
 // Reset Password
-router.post('/reset-password', resetPassword);
+router.post('/reset-password', resetPassword)
+
+// get the current users profile
+router.get('/user-profile', authenticateUser, getUserProfile)
 // * EXPORTS * //
 module.exports = router

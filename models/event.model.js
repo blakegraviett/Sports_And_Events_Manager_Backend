@@ -23,25 +23,24 @@ const eventModel = new Schema({
       type: String,
     },
   ],
-  teams: [
-    {
+  teams: {
+    homeTeam: {
       type: Types.ObjectId,
       ref: 'Team',
     },
-  ],
+    awayTeam: {
+      type: Types.ObjectId,
+      ref: 'Team',
+    },
+  },
   ticketLink: {
     type: String,
   },
   paymentLinkID: {
     type: String,
   },
-  location: {
-    type: String,
-    required: true,
-    maxLength: 1000,
-  },
   date: {
-    type: Date,
+    type: String,
     // ! CHANGE BACK AFTER DEVELOPMENT
     // required: true,
   },
@@ -61,11 +60,9 @@ const eventModel = new Schema({
       ref: 'User',
     },
   ],
-  links: [
-    {
-      type: String,
-    }
-  ]
+  link: {
+    type: String,
+  },
 })
 
 // * EXPORTS * //

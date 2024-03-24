@@ -8,10 +8,10 @@ const { getAllOrgs, getSingleOrg } = require('../controllers/org.controller')
 
 // * ROUTES * //
 // get all orgs
-router.get('/', authenticateUser, getAllOrgs)
+router.get('/', getAllOrgs)
 
 // get single org by id
-router.get('/:id', authenticateUser, getSingleOrg)
+router.get('/:id', getSingleOrg)
 
 // * EXPORTS * //
 module.exports = router

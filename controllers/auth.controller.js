@@ -116,7 +116,7 @@ const loginUser = async (req, res) => {
   }
 
   // check if password is correct
-  const isMatch = user.comparePassword(password)
+  const isMatch = await user.comparePassword(password)
 
   // if password is not correct, return error
   if (!isMatch) {
@@ -268,14 +268,29 @@ const logoutUser = async (req, res) => {
   res.cookie('accessToken', 'logout', {
     expires: new Date(Date.now()),
     httpOnly: true,
+    sameSite: 'none', // ! TESTING ONLY, REMOVE FOR PRODUCTION
+    secure: true,
   })
 
   res.cookie('refreshToken', 'logout', {
     expires: new Date(Date.now()),
     httpOnly: true,
+    sameSite: 'none', // ! TESTING ONLY, REMOVE FOR PRODUCTION
+    secure: true,
   })
 
   return successfulRes({ res })
+}
+
+// Get User Profile
+const getUserProfile = async (req, res) => {
+  const user = await User.findOne({ _id: req.user.userId })
+
+  // only return the users { role, name, and email }
+  return successfulRes({
+    res,
+    data: { name: user.name, email: user.email, role: user.role },
+  })
 }
 
 // * EXPORTS * //
@@ -286,4 +301,5 @@ module.exports = {
   logoutUser,
   forgotPassword,
   resetPassword,
+  getUserProfile,
 }

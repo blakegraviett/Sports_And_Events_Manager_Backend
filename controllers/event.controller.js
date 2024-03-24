@@ -58,18 +58,22 @@ const createEvent = async (req, res) => {
     location,
     date,
     description,
-    teamNames,
+    awayTeam,
+    homeTeam,
     workerEmails,
     sport,
-    links,
+    link,
     price: itemPrice,
+    ticketAmount,
   } = req.body
 
   // Get the workers from there email address
   const workers = await User.find({ email: workerEmails })
 
   // find the teams by name
-  const teams = await Team.find({ name: teamNames })
+  const foundHomeTeam = await Team.find({ name: homeTeam })
+
+  const foundAwayTeam = await Team.find({ name: awayTeam })
 
   // Get the organization and the author from the user
   const { org, userId } = req.user
@@ -104,6 +108,11 @@ const createEvent = async (req, res) => {
           quantity: 1,
         },
       ],
+      restrictions: {
+        completed_sessions: {
+          limit: ticketAmount,
+        },
+      },
     })
 
     paymentLinkID = paymentLink.id
@@ -116,10 +125,13 @@ const createEvent = async (req, res) => {
     date,
     sport,
     description,
-    teams,
+    teams: {
+      homeTeam: foundHomeTeam[0]._id,
+      awayTeam: foundAwayTeam[0]._id,
+    },
     workers,
     org,
-    links,
+    link,
     paymentLinkID: paymentLink.id,
     author: userId,
     ticketLink: paymentLink.url,
@@ -132,21 +144,23 @@ const createEvent = async (req, res) => {
 // Update event for an organization by admin
 const updateEvent = async (req, res) => {
   // Get the information from the request body
-  const { name, location, date, description, teamNames, workerEmails } =
+  const { name, location, date, description, awayTeam, homeTeam, link } =
     req.body
+  let { workers } = req.body
 
-  // default values
-  let workers = workerEmails
-  let teams = teamNames
-
-  // Get the workers from there email address
-  if (workerEmails) {
-    workers = await User.find({ email: workerEmails })
+  // Get the workers from there email address and convert them to Ids
+  if (workers) {
+    const workersIds = []
+    for (const worker of workers) {
+      const singleWorker = await User.find({ email: worker })
+      workersIds.push(singleWorker[0]._id)
+    }
+    workers = workersIds
   }
+
   // find the teams by name
-  if (teamNames) {
-    teams = await Team.find({ name: teamNames })
-  }
+  let foundHomeTeam = await Team.find({ name: homeTeam })
+  let foundAwayTeam = await Team.find({ name: awayTeam })
 
   // Get the id from the parameter
   const { id } = req.params
@@ -154,6 +168,16 @@ const updateEvent = async (req, res) => {
   // if no id, return error
   if (!id) {
     return unsuccessfulRes({ res })
+  }
+
+  // if no team then return old team
+  if (!awayTeam) {
+    const foundEvent = await Event.findOne({ _id: id })
+    foundAwayTeam[0] = { _id: foundEvent.teams.awayTeam }
+  }
+  if (!homeTeam) {
+    const foundEvent = await Event.findOne({ _id: id })
+    foundHomeTeam[0] = { _id: foundEvent.teams.homeTeam }
   }
 
   // update the event with the information from the request body
@@ -164,8 +188,12 @@ const updateEvent = async (req, res) => {
       location,
       date,
       description,
-      teams,
+      teams: {
+        homeTeam: foundHomeTeam[0]._id,
+        awayTeam: foundAwayTeam[0]._id,
+      },
       workers,
+      link,
     },
     { new: true }
   )
@@ -185,10 +213,10 @@ const updateScore = async (req, res) => {
   }
 
   // Get the information from the request body
-  const { score } = req.body
+  const { homeTeamScore, awayTeamScore } = req.body
 
   // if no score, return error
-  if (!score) {
+  if (!homeTeamScore || !awayTeamScore) {
     return unsuccessfulRes({ res })
   }
 
@@ -207,13 +235,13 @@ const updateScore = async (req, res) => {
   let period = ''
 
   if (sport === 'baseball') {
-    period = 'innging'
+    period = 'Innging'
   }
   if (sport === 'football' || sport === 'basketball') {
-    period = 'quarter'
+    period = 'Quarter'
   }
   if (sport === 'volleyball') {
-    period = 'game'
+    period = 'Game'
   }
 
   // defauly peiord ammount
@@ -224,8 +252,16 @@ const updateScore = async (req, res) => {
     periodAmount = foundEvent.period.length
   }
 
+  // Find the tems in the event
+  const homeTeam = await Team.find({ _id: foundEvent.teams.homeTeam._id })
+  const awayTeam = await Team.find({ _id: foundEvent.teams.awayTeam._id })
+
   // add the new period to the event
-  foundEvent.period.push(`${periodAmount + 1} ${period} : ${score}`)
+  foundEvent.period.push(
+    `${period} ${periodAmount + 1} : ${homeTeam[0].name}: ${homeTeamScore} - ${
+      awayTeam[0].name
+    }: ${awayTeamScore}`
+  )
 
   // save the update to the database
   await foundEvent.save()

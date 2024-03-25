@@ -110,6 +110,9 @@ const deleteSingleTeam = async (req, res) => {
 
 // Upload team logo
 const uploadSingleImageToCloudinary = async (req, res) => {
+  if (!req.files.img.tempFilePath) {
+    return unsuccessfulRes({ res, data: { msg: 'no file found' } })
+  }
   const result = await cloudinary.uploader.upload(req.files.img.tempFilePath, {
     use_filename: true,
     folder: 'team_logos',

@@ -109,7 +109,7 @@ const deleteSingleTeam = async (req, res) => {
 }
 
 // Upload team logo
-async function uploadSingleImageToCloudinary(req, res) {
+const uploadSingleImageToCloudinary = async (req, res) => {
   const result = await cloudinary.uploader.upload(req.files.img.tempFilePath, {
     use_filename: true,
     folder: 'team_logos',

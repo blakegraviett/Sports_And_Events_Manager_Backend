@@ -110,6 +110,9 @@ const deleteSingleTeam = async (req, res) => {
 
 // Upload team logo
 const uploadSingleImageToCloudinary = async (req, res) => {
+  console.log(req.files.img)
+
+  // if no file found, return error
   if (!req.files.img.tempFilePath) {
     return unsuccessfulRes({ res, data: { msg: 'no file found' } })
   }

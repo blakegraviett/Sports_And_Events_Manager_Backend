@@ -339,7 +339,7 @@ const sendEmailToWorkers = async (req, res) => {
   const { email } = req.user
 
   // send emails to each workers
-  if (isIndividual == 'false') {
+  if (isIndividual == false) {
     // ! ADD THEM IN THE SAME THREAD
     await sendEmail({
       from: email,
@@ -349,7 +349,7 @@ const sendEmailToWorkers = async (req, res) => {
     })
   }
 
-  if (isIndividual == 'true') {
+  if (isIndividual == true) {
     // ! SEND INDIVIDUAL EMAILS TO ALL THE WORKERS * //
     for (let i = 0; i < workersEmails.length; i++) {
       console.log('workersEmails[i]:', workersEmails[i])

@@ -21,7 +21,7 @@ const purchaseTickets = async (req, res) => {
       //.createRequestcode
       const qrCode = await qr.toString(origin, {
         errorCorrectionLevel: 'H',
-        type: 'svg',
+        type: 'String',
       })
 
       // create the ticket
@@ -33,8 +33,8 @@ const purchaseTickets = async (req, res) => {
       await sendEmail({
         from: 'sportalmanager@gmail.com',
         to: event['data']['object']['receipt_email'],
-        subject: 'Ticket Purchase',
-        html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br>${qrCode}`,
+        subject: 'Ticket Purchase 1',
+        html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <p style="width:250px">${qrCode}</p>`,
       })
     }
     default:

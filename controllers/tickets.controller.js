@@ -21,7 +21,7 @@ const purchaseTickets = async (req, res) => {
         const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
         //.createRequestcode
-        const qr_png = qr.imageSync(origin, { type: 'png' })
+        const qr_png = qr.toFile(origin, { type: 'png' })
 
         const transporter = nodemailer.createTransport({
           host: 'smtp.sendgrid.net',

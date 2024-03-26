@@ -33,7 +33,7 @@ const purchaseTickets = async (req, res) => {
       await sendEmail({
         from: 'sportalmanager@gmail.com',
         to: event['data']['object']['receipt_email'],
-        subject: 'Ticket Purchase 1',
+        subject: 'Ticket Purchase 5',
         html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br>`,
         attachments: [
           {

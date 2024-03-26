@@ -342,7 +342,7 @@ const sendEmailToWorkers = async (req, res) => {
   if (isIndividual == false) {
     // ! ADD THEM IN THE SAME THREAD
     await sendEmail({
-      from: email,
+      from: 'sportalmanager@gmail.com',
       to: workersEmails,
       subject: subject,
       html: body,

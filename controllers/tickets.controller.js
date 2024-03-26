@@ -4,6 +4,7 @@ const { sendEmail } = require('../lib/email')
 const qr = require('qrcode')
 const crypto = require('crypto')
 const Ticket = require('../models/ticket.model')
+const nodemailer = require('nodemailer')
 
 // * CONTROLLERS * //
 // send ticket purchase emails
@@ -20,8 +21,15 @@ const purchaseTickets = async (req, res) => {
         const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
         //.createRequestcode
-        const qrCode = await qr.toDataURL(origin, {
-          errorCorrectionLevel: 'H',
+        const qr_png = qr.imageSync(origin, { type: 'png' })
+
+        const transporter = nodemailer.createTransport({
+          host: 'smtp.sendgrid.net',
+          port: 587,
+          auth: {
+            user: 'apikey',
+            pass: process.env.SENDGRID_API_KEY,
+          },
         })
 
         // create the ticket
@@ -30,11 +38,18 @@ const purchaseTickets = async (req, res) => {
         })
 
         // send email to the user
-        await sendEmail({
+        await transporter.sendMail({
           from: 'sportalmanager@gmail.com',
           to: event['data']['object']['receipt_email'],
           subject: 'Ticket Purchase 5',
-          html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br>  <img src="${qrCode}" alt="QR Code">`,
+          html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br>`,
+          attachments: [
+            {
+              filename: 'ticket_qr_code.png',
+              content: qr_png,
+              encoding: 'base64',
+            },
+          ],
         })
       }
       return res.status(400).end()

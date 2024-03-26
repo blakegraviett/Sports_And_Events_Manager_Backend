@@ -21,7 +21,7 @@ const purchaseTickets = async (req, res) => {
       //.createRequestcode
       const qrCode = await qr.toString(origin, {
         errorCorrectionLevel: 'H',
-        type: 'String',
+        type: 'utf8',
       })
 
       // create the ticket

@@ -10,34 +10,34 @@ const Ticket = require('../models/ticket.model')
 const purchaseTickets = async (req, res) => {
   const event = req.body
   switch (event.type) {
-    case 'payment_intent.succeeded':
-      {
-        // ! SEND EMAIL ONLY IF PAYMENT IS SUCCESSFUL
-        // make a id for the ticket
-        const ticketId = crypto.randomBytes(60).toString('hex')
+    case 'payment_intent.succeeded': {
+      // ! SEND EMAIL ONLY IF PAYMENT IS SUCCESSFUL
+      // make a id for the ticket
+      const ticketId = crypto.randomBytes(60).toString('hex')
 
-        // qr code link
-        const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
+      // qr code link
+      const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
-        //.createRequestcode
-        const qrCode = await qr.toString(origin, {
-          errorCorrectionLevel: 'H',
-        })
+      //.createRequestcode
+      const qrCode = await qr.toString(origin, {
+        errorCorrectionLevel: 'H',
+      })
 
-        // create the ticket
-        await Ticket.create({
-          ticketId,
-        })
+      // create the ticket
+      await Ticket.create({
+        ticketId,
+      })
 
-        // send email to the user
-        await sendEmail({
-          from: 'sportalmanager@gmail.com',
-          to: event['data']['object']['receipt_email'],
-          subject: 'Ticket Purchase',
-          html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <pre>${qrCode}</pre>`,
-        })
-      }
+      // send email to the user
+      await sendEmail({
+        from: 'sportalmanager@gmail.com',
+        to: event['data']['object']['receipt_email'],
+        subject: 'Ticket Purchase',
+        html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <pre>${qrCode}</pre>`,
+      })
+    }
 
+    default:
       return res.status(400).end()
   }
 }

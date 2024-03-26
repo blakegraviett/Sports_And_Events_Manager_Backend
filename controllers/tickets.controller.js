@@ -16,7 +16,7 @@ const purchaseTickets = async (req, res) => {
       const ticketId = crypto.randomBytes(60).toString('hex')
 
       // qr code link
-      const origin = `http://localhost:4200/tickets/${ticketId}`
+      const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
       //.createRequestcode
       const qrCode = await qr.toString(origin, {
@@ -31,7 +31,7 @@ const purchaseTickets = async (req, res) => {
 
       // send email to the user
       await sendEmail({
-        from: 'sportal@sportal.com',
+        from: 'sportalmanager@sportal.com',
         to: event['data']['object']['receipt_email'],
         subject: 'Ticket Purchase',
         html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <p style="width:250px">${qrCode}</p>`,

@@ -19,9 +19,9 @@ const purchaseTickets = async (req, res) => {
       const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
       //.createRequestcode
-      const qrCode = await qr.toString(origin, {
+      const qrCode = await qr.imageSync(origin, {
         errorCorrectionLevel: 'H',
-        type: 'utf8',
+        type: 'png',
       })
 
       // create the ticket
@@ -35,6 +35,14 @@ const purchaseTickets = async (req, res) => {
         to: event['data']['object']['receipt_email'],
         subject: 'Ticket Purchase 1',
         html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <p style="width:250px">${qrCode}</p>`,
+        attachments: [
+          {
+            filename: 'qr_code.png',
+            content: qrCode,
+            encoding: 'base64',
+            cid: 'unique@nodemailer.com',
+          },
+        ],
       })
     }
     default:

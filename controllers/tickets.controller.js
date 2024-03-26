@@ -20,7 +20,9 @@ const purchaseTickets = async (req, res) => {
         const origin = `https://www.sportalmanager.com/tickets/${ticketId}`
 
         //.createRequestcode
-        const qrCode = await qr.toDataURL(origin)
+        const qrCode = await qr.toDataURL(origin, {
+          errorCorrectionLevel: 'H',
+        })
 
         // create the ticket
         await Ticket.create({
@@ -31,13 +33,10 @@ const purchaseTickets = async (req, res) => {
         await sendEmail({
           from: 'sportalmanager@gmail.com',
           to: event['data']['object']['receipt_email'],
-          subject: 'Ticket Purchase',
-          html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br>  
-           <img src="${qrCode}" alt="QR Code">
-          `,
+          subject: 'Ticket Purchase 5',
+          html: `Hi,<br><br>You have successfully purchased a ticket.<br><br>Thank you for your purchase.<br><br>Regards,<br><br>Team Sportal.<br><br> <pre>${qrCode}</pre>`,
         })
       }
-
       return res.status(400).end()
   }
 }

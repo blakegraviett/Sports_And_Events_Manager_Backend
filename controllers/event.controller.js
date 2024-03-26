@@ -335,9 +335,6 @@ const sendEmailToWorkers = async (req, res) => {
   // get all the workers emails
   const workersEmails = workers.map((worker) => worker.email)
 
-  // get the email of the admin user
-  const { email } = req.user
-
   // send emails to each workers
   if (isIndividual == false) {
     // ! ADD THEM IN THE SAME THREAD
